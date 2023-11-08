@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Audio Player</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        #audio-player {
+            width: 300px;
+            margin: 20px auto;
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        #audio-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        audio {
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        button {
+            margin: 0 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+        }
+
+        #play-pause-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        #prev-btn, #next-btn {
+            background-color: #008CBA;
+            color: white;
+        }
+
+        #shuffle-btn {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .song-list {
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        .song-item {
+            cursor: pointer;
+        }
+
+        #help {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div id="audio-player">
+        <audio id="audio" controls>
+            Your browser does not support the audio element.
+        </audio>
+        <div id="audio-controls">
+            <button id="prev-btn">Previous</button>
+            <button id="play-pause-btn">Play</button>
+            <button id="next-btn">Next</button>
+            <button id="shuffle-btn">Shuffle</button>
+        </div>
+        <div class="song-list" id="song-list">
+            <!-- Song list will be dynamically generated here -->
+        </div>
+        <div id="help">
+            <strong>Keyboard Shortcuts:</strong><br>
+            Space bar - Play/Pause<br>
+            Left Arrow - Skip song by 5 sec<br>
+            Right Arrow - Go backward by 5 sec<br>
+            UP Arrow - Increase Volume<br>
+            Down Arrow - Decrease Volume
+        </div>
+    </div>
+
+    <script>
+       const audio = document.getElementById('audio');
+        const playPauseButton = document.getElementById('play-pause-btn');
+        const prevButton = document.getElementById('prev-btn');
+        const nextButton = document.getElementById('next-btn');
+        const shuffleButton = document.getElementById('shuffle-btn');
+        const songList = document.getElementById('song-list');
+        let currentSongIndex = 0;
+        let isShuffleOn = false;
+
+        const audioFiles = Array.from({ length: 48 }, (_, i) => `static/song${i + 1}.mp3`);
+
+        function playAudio() {
+            audio.src = audioFiles[currentSongIndex];
+            audio.play();
+            playPauseButton.textContent = 'Pause';
+        }
+
+        function pauseAudio() {
+            audio.pause();
+            playPauseButton.textContent = 'Play';
+        }
+
+        function playNextSong() {
+            currentSongIndex = (currentSongIndex + 1) % audioFiles.length;
+            playAudio();
+        }
+
+        function playPreviousSong() {
+            currentSongIndex = (currentSongIndex - 1 + audioFiles.length) % audioFiles.length;
+            playAudio();
+        }
+
+        function toggleShuffle() {
+            isShuffleOn = !isShuffleOn;
+            shuffleButton.textContent = isShuffleOn ? 'Shuffle On' : 'Shuffle Off';
+        }
+
+        function updateSongList() {
+            songList.innerHTML = '';
+
+            audioFiles.forEach((song, index) => {
+                const songItem = document.createElement('div');
+                songItem.classList.add('song-item');
+                songItem.textContent = `Song ${index + 1}`;
+                songItem.addEventListener('click', () => {
+                    currentSongIndex = index;
+                    playAudio();
+                });
+                songList.appendChild(songItem);
+            });
+        }
+
+        // Event listener for the "ended" event to play the next song
+        audio.addEventListener('ended', () => {
+            if (!isShuffleOn) {
+                playNextSong();
+            } else {
+                currentSongIndex = Math.floor(Math.random() * audioFiles.length);
+                playAudio();
+            }
+        });
+
+        playPauseButton.addEventListener('click', () => {
+            if (audio.paused) {
+                playAudio();
+            } else {
+                pauseAudio();
+            }
+        });
+
+        nextButton.addEventListener('click', () => {
+            if (isShuffleOn) {
+                currentSongIndex = Math.floor(Math.random() * audioFiles.length);
+            } else {
+                playNextSong();
+            }
+        });
+
+        prevButton.addEventListener('click', () => {
+            if (isShuffleOn) {
+                currentSongIndex = Math.floor(Math.random() * audioFiles.length);
+            } else {
+                playPreviousSong();
+            }
+        });
+
+        shuffleButton.addEventListener('click', () => {
+            toggleShuffle();
+        });
+
+        updateSongList();
+        playAudio();
+    </script>
+</body>
+</html>
+
